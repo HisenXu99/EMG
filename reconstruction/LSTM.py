@@ -1,3 +1,4 @@
+import math
 import torch
 import datetime
 import numpy as np
@@ -82,5 +83,8 @@ def train(model, loader, device, epoch):
 
         torch.save(model.state_dict(), name)
         print('Epoch: %d, Loss: %.3f' % (epoch, mean(loss_list)))
+        if(math.isnan(mean(loss_list))):
+            print("Something wrong!")
+            break
         loss_list=[]
     pass

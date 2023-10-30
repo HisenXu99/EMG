@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 
 class Data():
     def __init__(self, emg_channel, force_channel):
+        self.emg_raw = []
+        self.force_raw = []
         self.emg_signal = pd.DataFrame()
         self.force_signal = pd.DataFrame()
         self.emg_channel = emg_channel
@@ -15,12 +17,27 @@ class Data():
 
     def get_data(self, path, file):
         mat = loadmat(os.path.join(path,file))
-        self.emg_signal = pd.DataFrame(mat['emg'])
-        self.force_signal = pd.DataFrame(mat['force'])
+        self.emg_raw = self.emg_signal = pd.DataFrame(mat['emg'])
+        self.force_raw = self.force_signal = pd.DataFrame(mat['force'])
         self.data_num = len(self.emg_signal)-1
         # return data,force
 
-    def crop_data(self):  #对数据进行裁剪，针对情况自己写
+    def crop_data(self, reps, gestures):  #对数据进行裁剪，针对情况自己写
+        if reps:
+            x = [np.where(data.values[:,13] == rep) for rep in reps]
+            indices = np.squeeze(np.concatenate(x, axis = -1))
+            self.emg_signal = self.emg_signal.iloc[indices, :]
+            self.emg_signal = self.emg_signal.reset_index(drop=True)
+            self.force_signal = self.force_signal.iloc[indices, :]
+            self.force_signal = self.force_signal.reset_index(drop=True)
+
+        if gestures:
+            x = [np.where(data.values[:,12] == move) for move in gestures]
+            indices = np.squeeze(np.concatenate(x, axis = -1))
+            self.emg_signal = self.emg_signal.iloc[indices, :]
+            self.emg_signal = self.emg_signal.reset_index(drop=True)
+            self.force_signal = self.force_signal.iloc[indices, :]
+            self.force_signal = self.force_signal.reset_index(drop=True)
         pass
 
 
