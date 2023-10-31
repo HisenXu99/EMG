@@ -22,22 +22,31 @@ class Data():
         self.data_num = len(self.emg_signal)-1
         # return data,force
 
-    def crop_data(self, reps, gestures):  #对数据进行裁剪，针对情况自己写
+    def crop_data(self, path, file):  #对数据进行裁剪，针对情况自己写
+        mat = loadmat(os.path.join(path,file))
+        # stimulus = pd.DataFrame(mat['restimulus'])
+        # repetition = pd.DataFrame(mat['repetition'])
+        all = pd.concat([self.emg_signal,self.force_signal],axis=1)
+        all['stimulus'] = mat['restimulus']
+        all['repetition'] = mat['repetition']
+        # stimulus[:20000].plot(figsize = (15,10))
+        # repetition[:20000].plot(figsize = (15,10))
+        reps = [1,2,3,4,5,6]
+        gestures = [41]
         if reps:
-            x = [np.where(data.values[:,13] == rep) for rep in reps]
+            x = [np.where(all.values[:,-1] == rep) for rep in reps]
             indices = np.squeeze(np.concatenate(x, axis = -1))
-            self.emg_signal = self.emg_signal.iloc[indices, :]
-            self.emg_signal = self.emg_signal.reset_index(drop=True)
-            self.force_signal = self.force_signal.iloc[indices, :]
-            self.force_signal = self.force_signal.reset_index(drop=True)
+            all = all.iloc[indices, :]
+            all = all.reset_index(drop=True)
 
         if gestures:
-            x = [np.where(data.values[:,12] == move) for move in gestures]
+            x = [np.where(all.values[:,-2] == move) for move in gestures]
             indices = np.squeeze(np.concatenate(x, axis = -1))
-            self.emg_signal = self.emg_signal.iloc[indices, :]
-            self.emg_signal = self.emg_signal.reset_index(drop=True)
-            self.force_signal = self.force_signal.iloc[indices, :]
-            self.force_signal = self.force_signal.reset_index(drop=True)
+            all = all.iloc[indices, :]
+            all = all.reset_index(drop=True)
+
+        self.emg_signal = all.iloc[:,:12]
+        self.force_signal = all.iloc[:,12:18]
         pass
 
 
