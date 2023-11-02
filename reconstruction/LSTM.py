@@ -64,7 +64,7 @@ def train(model, loader, device, epoch):
     model.to(device)
     loss_list=[]
 
-    name = 'model_' + datetime.datetime.now().strftime('%d-%H:%M') + '.pth'
+    name = 'LSTM' + '-b'+ str(loader.batch_size)  + datetime.datetime.now().strftime('%d-%H:%M') + '.pth'
 
     for epoch in range(epoch):
         for i, data in enumerate(loader):

@@ -48,9 +48,10 @@ class MyModel(nn.Module):
     def __init__(self, feature_num, force_num):
         super(MyModel, self).__init__()
         self.net=nn.Sequential(
-            nn.Linear(in_features=feature_num,out_features=128),nn.ReLU(),
-            nn.Linear(128,512),nn.ReLU(),
-            nn.Linear(512,128),nn.ReLU(),
+            nn.Linear(in_features=feature_num,out_features=128),nn.LeakyReLU(),
+            nn.Linear(128,512),nn.LeakyReLU(),
+            nn.Linear(512,128),nn.LeakyReLU(),
+            # nn.Linear(1024,128),nn.LeakyReLU(),
             nn.Linear(128,force_num)
         )
 
@@ -73,24 +74,24 @@ class Dst(Dataset):
         return self.x[i], self.y[i]
     
     
-def DatatoTorch(x, y, device):
+def DatatoTorch(x, y, size, device):
     print(x.shape)
     print(y.shape)
     x = torch.tensor(x).to(device)
     y = torch.tensor(y).to(device)
     train_dst = Dst(x, y)
-    loader = DataLoader(train_dst, batch_size=25, shuffle=True)
+    loader = DataLoader(train_dst, batch_size=size, shuffle=True)
     return loader
 
 
 def train(model, loader, device, epoch):
     # criterion = nn.L1Loss()
     criterion=nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=2e-2)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
     model.to(device)
     loss_list=[]
 
-    name = 'model_' + datetime.datetime.now().strftime('%d-%H:%M') + '.pth'
+    name = 'FCNN' + '-b'+ str(loader.batch_size) + datetime.datetime.now().strftime('-%d:%H:%M') +'.pth'
     print(name)
 
     for epoch in range(epoch):
@@ -107,11 +108,12 @@ def train(model, loader, device, epoch):
             model.eval()  # 将模型设置为评估模式，禁用训练相关的操作，例如Dropout或BatchNormalization
 
             # print('Epoch: %d, Loss: %.3f' % (epoch, loss.item()))
-
-        torch.save(model.state_dict(), name)
+        if(epoch%1000==0):
+            torch.save(model.state_dict(), name)
         print('Epoch: %d, Loss: %.3f' % (epoch, mean(loss_list)))
         if(math.isnan(mean(loss_list))):
             print("Something wrong!")
             break
         loss_list=[]
+    torch.save(model.state_dict(), name)
     pass

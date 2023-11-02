@@ -32,7 +32,7 @@ class Data():
         # stimulus[:20000].plot(figsize = (15,10))
         # repetition[:20000].plot(figsize = (15,10))
         reps = [1,2,3,4,5,6]
-        gestures = [41]
+        gestures = [41,42]
         if reps:
             x = [np.where(all.values[:,-1] == rep) for rep in reps]
             indices = np.squeeze(np.concatenate(x, axis = -1))
