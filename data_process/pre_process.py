@@ -28,7 +28,7 @@ class Data():
         all['stimulus'] = mat['restimulus']
         all['repetition'] = mat['repetition']
         reps = [1,2,3,4,5,6]
-        gestures = [41,42,43,44,45,46]
+        gestures = [41,42,43,44,45,46,47,48]
         if reps:
             x = [np.where(all.values[:,-1] == rep) for rep in reps]
             indices = np.squeeze(np.concatenate(x, axis = -1))

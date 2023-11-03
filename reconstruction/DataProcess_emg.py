@@ -85,7 +85,7 @@ class Data():
     def rectify_data(self):
         self.emg_signal = abs(self.emg_signal)
 
-    def windowing_data(self, win_len, win_stride):
+    def wwindowing_data(self, win_len, win_stride):
 
         idx=  [i for i in range(win_len, len(self.emg_signal), win_stride)]
         

@@ -11,8 +11,8 @@ from torch.utils.data import Dataset, DataLoader
 class MyModel(nn.Module):
     def __init__(self, nodes, win_len, output_num):
         super(MyModel, self).__init__()
-        self.lstm_1 = nn.LSTM(nodes, nodes, dropout=0.2, batch_first=True)
-        self.lstm_2 = nn.LSTM(nodes, nodes, dropout=0.2, batch_first=True)
+        self.lstm_1 = nn.LSTM(nodes, nodes, num_layers=2, dropout=0.2, batch_first=True)
+        self.lstm_2 = nn.LSTM(nodes, nodes, num_layers=2,dropout=0.2, batch_first=True)
         # self.lstm_3 = nn.LSTM(nodes, nodes, dropout=0.2, batch_first=True)
         # self.lstm_4 = nn.LSTM(nodes, nodes, dropout=0.2, batch_first=True)   #输出是100*12
         self.flatten = nn.Flatten()   #压缩成1200
@@ -51,7 +51,7 @@ class Dst(Dataset):
         return self.x[i], self.y[i]
     
     
-def DatatoTorch(x, y, device):
+def DatatoTorch(x, y, size, device):
     x = torch.tensor(x).to(device)
     y = torch.tensor(y).to(device)
     train_dst = Dst(x, y)
@@ -59,13 +59,16 @@ def DatatoTorch(x, y, device):
     return loader
 
 
-def train(model, loader, device, epoch):
-    criterion = nn.L1Loss()
-    optimizer = optim.Adam(model.parameters(), lr=2e-3)
+def train(model, loader, device, epoch, path):
+    # criterion = nn.L1Loss()
+    criterion=nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
     model.to(device)
     loss_list=[]
 
-    name = 'LSTM' + '-b'+ str(loader.batch_size)  + datetime.datetime.now().strftime('%d-%H:%M') + '.pth'
+    name = path + 'LSTM' + '-b'+ str(len(loader)) + datetime.datetime.now().strftime('-%d:%H:%M') +\
+        '-i'+ str(next(iter(loader))[0].shape[-1]) + 'o' + str(next(iter(loader))[1].shape[-1]) +'.pth'
+    print(name)
 
     for epoch in range(epoch):
         for i, data in enumerate(loader):
@@ -81,8 +84,10 @@ def train(model, loader, device, epoch):
             model.eval()  #dropout
 
             # print('Epoch: %d, Loss: %.3f' % (epoch, loss.item()))
+        if(epoch%10==0):
+            state = {'net':model.state_dict(), 'optimizer':optimizer.state_dict(), 'epoch':epoch}
+            torch.save(state, name)
 
-        torch.save(model.state_dict(), name)
         print('Epoch: %d, Loss: %.3f' % (epoch, mean(loss_list)))
         if(math.isnan(mean(loss_list))):
             print("Something wrong!")
@@ -97,7 +102,7 @@ def result(model, x, y):
     for i, data in enumerate(x):
         with torch.no_grad():
             outputs = model(torch.unsqueeze(x[i], dim=0)).cpu()
-            print(outputs.size())
+            print(i)
             list.append(outputs[0].numpy().tolist())
     data=pd.DataFrame(list)
     return data

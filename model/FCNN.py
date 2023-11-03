@@ -118,7 +118,7 @@ def train(model, loader, device, epoch, path):
             print("Something wrong!")
             break
         loss_list=[]
-    torch.save(model.state_dict(), name)
+    # torch.save(model.state_dict(), name)
     pass
 
 def result(model, x, y):
