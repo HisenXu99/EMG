@@ -22,7 +22,7 @@ class Data():
         self.data_num = len(self.emg_signal)-1
         # return data,force
 
-    def crop_data(self, path, file):  #对数据进行裁剪，针对情况自己写
+    def crop_data1(self, path, file):  #对数据进行裁剪，针对情况自己写
         mat = loadmat(os.path.join(path,file))
         all = pd.concat([self.emg_signal,self.force_signal],axis=1)
         all['stimulus'] = mat['restimulus']
@@ -43,7 +43,8 @@ class Data():
 
         self.emg_signal = all.iloc[:,:12]
         self.force_signal = all.iloc[:,12:18]
-        pass
+        #返回一个字典，用于参数记录
+        return {'reps':reps, 'gestures':gestures}
 
 
     def normalise(self):  #!没写完，标准化变成均值为0

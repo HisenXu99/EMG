@@ -1,6 +1,5 @@
 import math
 import torch
-import datetime
 import numpy as np
 import pandas as pd
 import torch.nn as nn
@@ -85,16 +84,12 @@ def DatatoTorch(x, y, size, device):
     return loader
 
 
-def train(model, loader, device, epoch, path):
+def train(model, loader, device, epoch, name):
     # criterion = nn.L1Loss()
     criterion=nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
     model.to(device)
     loss_list=[]
-
-    name = path + 'FCNN' + '-b'+ str(loader.batch_size) + datetime.datetime.now().strftime('-%d:%H:%M') +\
-        '-i'+ loader.x.shape[1] + 'o' + loader.y.shape[1] +'.pth'
-    print(name)
 
     for epoch in range(epoch):
         for i, data in enumerate(loader):

@@ -1,7 +1,8 @@
 from data_process.pre_process import *
 from data_process.feature import *
+from utils.save_config import *
 from model.LSTM import *
-
+import datetime
 import torch
 
 # data=Data(12,6)
@@ -24,7 +25,7 @@ epoch = 10000
 
 data=Data(12,6)
 data.get_data('/remote-home/2230728/project/EMG/NinaPro/DB2', 'S5_E3_A1.mat')
-data.crop_data('/remote-home/2230728/project/EMG/NinaPro/DB2', 'S5_E3_A1.mat')
+data_crop = data.crop_data1('/remote-home/2230728/project/EMG/NinaPro/DB2', 'S5_E3_A1.mat')
 data.normalise()
 data.filter_data(f=(20,50), butterworth_order=4, btype='bandpass')
 data.rectify_data()
@@ -34,7 +35,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = MyModel(12, win_len, 6)
 #loader = DatatoTorch(feature.time_features_matrix.astype(np.float32), y[:,0,None].astype(np.float32), 32, device)
 loader = DatatoTorch(x.astype(np.float32), y.astype(np.float32), batch, device)
-train(model, loader, device, epoch, 'model_path/')
+
+name = 'model_path/' + 'LSTM' + '-b'+ str(len(loader)) + datetime.datetime.now().strftime('-%d:%H:%M') +\
+    '-i'+ str(next(iter(loader))[0].shape[-1]) + 'o' + str(next(iter(loader))[1].shape[-1])
+print(name)
+save_config(name+'.txt', 'FCNN', data_crop, win_len, win_stride, 0.0001, str(loader.batch_size))
+train(model, loader, device, epoch, name+'.pth')
 
 
 #参数快照编写，应该放在训练之前
