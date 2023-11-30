@@ -22,13 +22,13 @@ class Data():
         self.data_num = len(self.emg_signal)-1
         # return data,force
 
-    def crop_data1(self, path, file):  #对数据进行裁剪，针对情况自己写
+    def crop_data(self, path, file):  #对数据进行裁剪，针对情况自己写
         mat = loadmat(os.path.join(path,file))
         all = pd.concat([self.emg_signal,self.force_signal],axis=1)
         all['stimulus'] = mat['restimulus']
         all['repetition'] = mat['repetition']
-        reps = [1,2,3,4,5,6]
-        gestures = [41,42,43,44,45,46,47,48]
+        reps = [5,6]
+        gestures = [41,42,43,44,45,46]
         if reps:
             x = [np.where(all.values[:,-1] == rep) for rep in reps]
             indices = np.squeeze(np.concatenate(x, axis = -1))
@@ -45,7 +45,7 @@ class Data():
         self.force_signal = all.iloc[:,12:18]
         #返回一个字典，用于参数记录
         return {'reps':reps, 'gestures':gestures}
-
+    
 
     def normalise(self):  #!没写完，标准化变成均值为0
         print("Not yet!!!!!!!!!!!!!!!!!!!!")
@@ -95,6 +95,22 @@ class Data():
             x[i] = self.emg_signal.iloc[start:end, :].values
             force_win = self.force_signal.iloc[start:end, :].values
             y[i] = np.average(force_win,axis=0)
+        return x, y
+    
+    def windowing_data2(self, win_len, win_stride, len_data):
+
+        idx=  [i for i in range(win_len, len_data, win_stride)]
+        print(idx)
+        
+        x = np.zeros([len(idx), win_len, self.emg_channel])
+        force_win=np.zeros([1, self.force_channel])
+        y = np.zeros([len(idx), self.force_channel])
+        
+        for i,end in enumerate(idx):
+            start = end - win_len
+            x[i] = self.emg_signal.iloc[start:end, :].values      
+            force_win = self.force_signal.iloc[i+1,:self.force_channel].values  #这里写成i+1相当于用前200个肌电来进行预测
+            y[i] = force_win
         return x, y
     
 # data=Data(12,6)

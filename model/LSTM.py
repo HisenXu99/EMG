@@ -54,7 +54,7 @@ def DatatoTorch(x, y, size, device):
     x = torch.tensor(x).to(device)
     y = torch.tensor(y).to(device)
     train_dst = Dst(x, y)
-    loader = DataLoader(train_dst, batch_size=32, shuffle=True)
+    loader = DataLoader(train_dst, batch_size=size, shuffle=True)
     return loader
 
 
