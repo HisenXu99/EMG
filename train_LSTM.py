@@ -13,13 +13,15 @@ batch = 32
 epoch = 10000
 
 
-data=Data(6,2)  #这里就可以改变力和emg的通道数
-data.get_data('/remote-home/2230728/project/EMG/myDataset/', 'merge123.mat')
+data=Data(3,6)  #这里就可以改变力和emg的通道数
+data.get_data('/remote-home/2230728/project/EMG/myDataset/', 'data.mat')
+# data.get_data('/remote-home/2230728/project/EMG/myDataset/', 'merge123.mat')
 # data_crop = data.crop_data1('/remote-home/2230728/project/EMG/myDataset/', 'Merge2023-11-18-14-24-13.mat')
 data.normalise()
 data.filter_data(f=(20,50), butterworth_order=4, btype='bandpass')
 data.rectify_data()
-x,y = data.windowing_data2(200, 20, 210000)
+# x,y = data.windowing_data2(200, 20, 210000)
+x,y = data.windowing_data2(200, 20, 236600)
 print(x.shape)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 loader = DatatoTorch(x.astype(np.float32), y.astype(np.float32), batch, device)
